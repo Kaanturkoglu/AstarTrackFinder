@@ -15,7 +15,10 @@ public class Track {
     private Obstacle forest = new Forest();
     private Obstacle water = new Water();
     private Obstacle grass = new Grass();
+    private Obstacle sand = new Sand();
     private Obstacle friendlyObs = new FriendlyObstacle();
+    private Obstacle enemyObs = new EnemyObstacle();
+
     private int rows;
     private int cols;
 
@@ -29,18 +32,23 @@ public class Track {
 
     private void generateTrack() {
         int totalCells = rows * cols;
-        int numObstructions = (int) (totalCells * 0.1);
-        int numMountains = (int) (numObstructions * 0.25);
-        int numWaterCells = (int) (totalCells * 0.1); // Example percentage for water
-        int numFriendlyObs = (int) (numObstructions * 0.25);
+        int numObstructions = (int) (totalCells * 0.3);
+        int numMountains = (int) (numObstructions * 0.65);
+        int numWaterCells = (int) (totalCells * 0.05); // Example percentage for water
+        int numFriendlyObs = (int) (numObstructions * 0.05);
+        int numEnemyObs = (int) (numObstructions * 0.05);
 
         // Place mountains and obstructions randomly
         placeRandomCells(numMountains, mountain);
         placeRandomCells(numFriendlyObs, friendlyObs );
+        placeRandomCells(numEnemyObs, enemyObs);
 
         // Generate water clusters
         generateWaterClusters(numWaterCells);
         generateForestClusters(numObstructions - numMountains);
+
+        // Place sand around water
+        placeSandAroundWater();
 
         // Fill the rest with clear paths
         for (int i = 0; i < rows; i++) {
@@ -127,6 +135,33 @@ public class Track {
                     queue.add(new int[] { x, y - 1 });
                 }
             }
+        }
+    }
+
+    private void placeSandAroundWater() {
+        // Iterate through each cell in the track
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                // Check if the current cell is water
+                if (track[i][j] == water.getObstacleType()) {
+                    // Try to place sand in all 8 surrounding directions
+                    tryPlaceSand(i - 1, j);     // Up
+                    tryPlaceSand(i + 1, j);     // Down
+                    tryPlaceSand(i, j - 1);     // Left
+                    tryPlaceSand(i, j + 1);     // Right
+                    tryPlaceSand(i - 1, j - 1); // Top-left
+                    tryPlaceSand(i - 1, j + 1); // Top-right
+                    tryPlaceSand(i + 1, j - 1); // Bottom-left
+                    tryPlaceSand(i + 1, j + 1); // Bottom-right
+                }
+            }
+        }
+    }
+
+    private void tryPlaceSand(int x, int y) {
+        // Check if the cell is within bounds and currently a clear path or grass
+        if (x >= 0 && x < rows && y >= 0 && y < cols && (track[x][y] == 0 || track[x][y] == grass.getObstacleType())) {
+            track[x][y] = sand.getObstacleType();
         }
     }
 

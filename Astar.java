@@ -32,10 +32,12 @@ public class Astar extends Application {
     Button startButton = new Button("Start");
 
     Image grass = new Image("file:/Users/kaanturkoglu/Desktop/grass20.png");
+    Image sand = new Image("file:/Users/kaanturkoglu/Desktop/sandtile.png");
     Image water = new Image("file:/Users/kaanturkoglu/Desktop/water.gif");
     Image mountain = new Image("file:/Users/kaanturkoglu/Desktop/mountile.png");
-    Image forest = new Image("file:/Users/kaanturkoglu/Desktop/forfor.png");
-    Image friendlyObs = new Image("file:/Users/kaanturkoglu/Desktop/asdas.png");
+    Image forest = new Image("file:/Users/kaanturkoglu/Desktop/lowObs.png");
+    Image friendlyObs = new Image("file:/Users/kaanturkoglu/Desktop/friendsObs.png");
+    Image enemyObs = new Image("file:/Users/kaanturkoglu/Desktop/enemysObs.png");
 
     @Override
     public void start(Stage primaryStage) {
@@ -118,10 +120,17 @@ public class Astar extends Application {
                     rect.setFill(new ImagePattern(forest));
                 } else if (grid[i][j] == 3) {
                     rect.setFill(new ImagePattern(water));
-                } else if (grid[i][j] == 5) {
+                } 
+                else if (grid[i][j] == 4) {
+                    rect.setFill(new ImagePattern(sand));
+                }
+                else if (grid[i][j] == 5) {
                     rect.setFill(new ImagePattern(friendlyObs));
-
-                } else {
+                } 
+                else if (grid[i][j] == 6) {
+                    rect.setFill(new ImagePattern(enemyObs));
+                }
+                else {
                     rect.setFill(new ImagePattern(grass));
                 }
                 int x = i;
