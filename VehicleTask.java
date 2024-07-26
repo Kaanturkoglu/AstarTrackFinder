@@ -72,10 +72,17 @@ class VehicleTask implements Runnable {
                     Vehicle otherVehicle = getVehicleAt(pos[0], pos[1]);
 
                     if (this.vehicle.getType().equals("Enemy") && otherVehicle.getType().equals("Friendly")) {
-                        System.out.println("Vehicle " + vehicle.getIndex() + " encountered friendly vehicle, waiting... at point " + pos[0] + ", "
+                        System.out.println("Vehicle " + vehicle.getIndex()
+                                + " encountered friendly vehicle, waiting... at point " + pos[0] + ", "
                                 + pos[1]);
                         // Enemy-friendly encounter
-                       break;
+                        break;
+                    }
+
+                    if (vehicle.getType().equals(otherVehicle.getType())
+                            && !vehicle.getVehicleType().equals(otherVehicle.getVehicleType())) {
+                        // Friendly-friendly or enemy-enemy encounter when vehicle types are different
+                        break;
                     }
 
                     if (shouldReroute(otherVehicle, waitCycles)) {
@@ -86,12 +93,6 @@ class VehicleTask implements Runnable {
                     }
 
                     waitCycles++;
-                    // if (waitCycles > MAX_WAIT_CYCLES) {
-                    // // Attempt rerouting if wait cycles exceed limit
-                    // System.out.println("Waiting too long, attempting re-route...");
-                    // reRoute(currentPositionIndex);
-                    // return;
-                    // }
 
                     cellFree.awaitNanos(100000000L); // 100ms
                 }
@@ -209,7 +210,8 @@ class VehicleTask implements Runnable {
                         }
                     }
                 } else {
-                    if (newX >= 0 && newX < rows && newY >= 0 && newY < cols && (grid[newX][newY] == 0 || grid[newX][newY] == 4)
+                    if (newX >= 0 && newX < rows && newY >= 0 && newY < cols
+                            && (grid[newX][newY] == 0 || grid[newX][newY] == 4)
                             && !visited[newX][newY] && !isCellFull(newX, newY, fullCells)) {
                         double gCost = current.g + ((direction[0] == 0 || direction[1] == 0) ? 1 : Math.sqrt(2));
                         double hCost = calculateHeuristic(newX, newY, endX, endY);
@@ -235,7 +237,22 @@ class VehicleTask implements Runnable {
     private boolean isCellFull(int x, int y, List<int[]> fullCells) {
         lock.lock();
         try {
-            return getVehicleAt(x, y) != null;
+            Vehicle otherVehicle = getVehicleAt(x, y);
+            if (otherVehicle == null) {
+                return false;
+            } else if (vehicle.getType().equals("Friendly") && otherVehicle.getType().equals("Enemy")) {
+                return true;
+            } else if (vehicle.getType().equals("Friendly") && otherVehicle.getType().equals("Friendly")
+                    && !vehicle.getVehicleType().equals(otherVehicle.getVehicleType())) {
+                return false;
+
+            } else if (vehicle.getType().equals("Enemy") && otherVehicle.getType().equals("Friendly")) {
+                return false;
+            } else if (vehicle.getType().equals("Enemy") && otherVehicle.getType().equals("Enemy")
+                    && !vehicle.getVehicleType().equals(otherVehicle.getVehicleType())) {
+                return false;
+            }
+            return true;
         } finally {
             lock.unlock();
         }
