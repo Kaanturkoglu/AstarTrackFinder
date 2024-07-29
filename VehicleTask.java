@@ -60,7 +60,6 @@ class VehicleTask implements Runnable {
             return;
         }
 
-        
         while (currentPositionIndex < vehicle.getPath().size()) {
             int[] pos = vehicle.getPath().get(currentPositionIndex);
             int waitCycles = 0;
@@ -84,7 +83,7 @@ class VehicleTask implements Runnable {
 
                     waitCycles++;
 
-                    cellFree.awaitNanos(1000000L); 
+                    cellFree.awaitNanos(1000000L);
                 }
 
                 vehicle.setCurrentX(pos[0]); // Move the vehicle to the new position
@@ -111,8 +110,6 @@ class VehicleTask implements Runnable {
 
             currentPositionIndex++;
         }
-
-       
     }
 
     private void reRoute(int atIndex) {
@@ -143,7 +140,7 @@ class VehicleTask implements Runnable {
         }
         this.reRouted = true;
 
-        run(); 
+        run();
     }
 
     private List<int[]> aStar(int[][] grid, int startX, int startY, int endX, int endY, List<int[]> fullCells) {
@@ -181,10 +178,11 @@ class VehicleTask implements Runnable {
                 int newX = x + direction[0];
                 int newY = y + direction[1];
 
-                if (newX >= 0 && newX < rows && newY >= 0 && newY < cols 
-                        && grid[newX][newY] != 1
-                        && !visited[newX][newY] 
-                        && !isCellFull(newX, newY, fullCells)) {
+                if (newX >= 0 && newX < rows && newY >= 0 && newY < cols
+                        && !isObstacleArea(newX, newY, grid, vehicle.getVehicleType())
+                        && !visited[newX][newY]
+                        && !isCellFull(newX, newY, fullCells)
+                        && !isProhibitedArea(newX, newY, grid, vehicle.getType())) { // Add this check
 
                     double gCost = current.g + ((direction[0] == 0 || direction[1] == 0) ? 1 : Math.sqrt(2));
                     double hCost = calculateHeuristic(newX, newY, endX, endY);
@@ -203,6 +201,59 @@ class VehicleTask implements Runnable {
         long timeElapsed = finish - start;
         System.out.println("Time elapsed: " + timeElapsed / 1000000 + " ms");
         return Collections.emptyList();
+    }
+
+    private boolean isObstacleArea(int x, int y, int[][] grid, String vehicleType) {
+        if (vehicle.getVehicleType().equals("Tank")) {
+            if (grid[x][y] == 1 || grid[x][y] == 2 || grid[x][y] == 3 || grid[x][y] == 5 || grid[x][y] == 6) {
+                return true;
+            }
+        } else if (vehicle.getVehicleType().equals("Helicopter")) {
+            if (grid[x][y] == 1 || grid[x][y] == 5 || grid[x][y] == 6) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isProhibitedArea(int x, int y, int[][] grid, String vehicleType) {
+        if (vehicleType.equals("Friendly")) {
+            return isNearEnemyObstacle(x, y, grid);
+        } else if (vehicleType.equals("Enemy")) {
+            return isNearFriendlyObstacle(x, y, grid);
+        }
+
+        return false;
+    }
+
+    private boolean isNearFriendlyObstacle(int x, int y, int[][] grid) {
+        int rows = grid.length;
+        int cols = grid[0].length;
+
+        for (int i = Math.max(0, x - 1); i <= Math.min(rows - 1, x + 1); i++) {
+            for (int j = Math.max(0, y - 1); j <= Math.min(cols - 1, y + 1); j++) {
+                if (grid[i][j] == 5) { // Friendly obstacle
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isNearEnemyObstacle(int x, int y, int[][] grid) {
+        int rows = grid.length;
+        int cols = grid[0].length;
+
+        for (int i = Math.max(0, x - 1); i <= Math.min(rows - 1, x + 1); i++) {
+            for (int j = Math.max(0, y - 1); j <= Math.min(cols - 1, y + 1); j++) {
+                if (grid[i][j] == 6) { // Enemy obstacle
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private boolean isCellFull(int x, int y, List<int[]> fullCells) {
@@ -256,8 +307,9 @@ class VehicleTask implements Runnable {
         if (index == path.size() - 1) {
             vehicle.setArrived(true);
             // for (int i = 0; i < vehicle.getPath().size(); i++) {
-            //     System.out.println("Vehicle " + vehicle.getIndex() + " path: " + vehicle.getPath().get(i)[0] + ", "
-            //             + vehicle.getPath().get(i)[1]);
+            // System.out.println("Vehicle " + vehicle.getIndex() + " path: " +
+            // vehicle.getPath().get(i)[0] + ", "
+            // + vehicle.getPath().get(i)[1]);
             // }
         }
 

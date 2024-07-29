@@ -22,7 +22,6 @@ public class Track {
     private int rows;
     private int cols;
 
-
     public Track(int rows, int cols) {
         this.rows = rows;
         this.cols = cols;
@@ -40,7 +39,7 @@ public class Track {
 
         // Place mountains and obstructions randomly
         placeRandomCells(numMountains, mountain);
-        placeRandomCells(numFriendlyObs, friendlyObs );
+        placeRandomCells(numFriendlyObs, friendlyObs);
         placeRandomCells(numEnemyObs, enemyObs);
 
         // Generate water clusters
@@ -72,7 +71,7 @@ public class Track {
             Queue<int[]> queue = new LinkedList<>();
             queue.add(new int[] { startX, startY });
             int cellsToPlace = Math.min(7 + rand.nextInt(7), numForest - forestPlaced); // Ensure at least 3 water
-                                                                                           // cells per cluster
+                                                                                        // cells per cluster
 
             while (!queue.isEmpty() && cellsToPlace > 0) {
                 int[] cell = queue.poll();
@@ -145,10 +144,10 @@ public class Track {
                 // Check if the current cell is water
                 if (track[i][j] == water.getObstacleType()) {
                     // Try to place sand in all 8 surrounding directions
-                    tryPlaceSand(i - 1, j);     // Up
-                    tryPlaceSand(i + 1, j);     // Down
-                    tryPlaceSand(i, j - 1);     // Left
-                    tryPlaceSand(i, j + 1);     // Right
+                    tryPlaceSand(i - 1, j); // Up
+                    tryPlaceSand(i + 1, j); // Down
+                    tryPlaceSand(i, j - 1); // Left
+                    tryPlaceSand(i, j + 1); // Right
                     tryPlaceSand(i - 1, j - 1); // Top-left
                     tryPlaceSand(i - 1, j + 1); // Top-right
                     tryPlaceSand(i + 1, j - 1); // Bottom-left

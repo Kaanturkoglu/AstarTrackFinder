@@ -17,7 +17,7 @@ import java.util.List;
 public class Astar extends Application {
     public static final int TILE_SIZE = 80;
     public static final int[][] DIRECTIONS = {
-            {0, 1}, {0, -1}, {1, 0}, {-1, 0}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}
+            { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 }, { 1, 1 }, { -1, -1 }, { 1, -1 }, { -1, 1 }
     };
 
     private Track track = new Track(20, 20);
@@ -25,7 +25,6 @@ public class Astar extends Application {
 
     public List<Vehicle> vehicles = new ArrayList<>();
     private Vehicle currentVehicle = null;
-    private int currentVehicleIndex = -1;
     public boolean newVehicleAdded = false;
 
     private GridPane gridPane;
@@ -83,6 +82,7 @@ public class Astar extends Application {
         } else {
             System.out.println("Finish placing the current vehicle first.");
         }
+        updateGrid();
     }
 
     private void handleCellClick(int x, int y) {
@@ -93,21 +93,39 @@ public class Astar extends Application {
         }
 
         if (currentVehicle != null) {
-            if (currentVehicle.getStartX() == -1 && currentVehicle.getStartY() == -1) {
-                currentVehicle.setStartX(x);
-                currentVehicle.setStartY(y);
-                Rectangle startRect = new Rectangle(TILE_SIZE, TILE_SIZE, currentVehicle.getColor());
-                gridPane.add(startRect, currentVehicle.getStartY(), currentVehicle.getStartX());
-            } else if (currentVehicle.getEndX() == -1 && currentVehicle.getEndY() == -1) {
-                currentVehicle.setEndX(x);
-                currentVehicle.setEndY(y);
-                vehicles.add(currentVehicle);
-                currentVehicleIndex++;
-                newVehicleAdded = true;
-                updateGrid();
-                currentVehicle = null;  // Reset current vehicle
+            // Check if placement is valid
+            if (isPlacementValid(x, y, currentVehicle)) {
+                if (currentVehicle.getStartX() == -1 && currentVehicle.getStartY() == -1) {
+                    currentVehicle.setStartX(x);
+                    currentVehicle.setStartY(y);
+                    Rectangle startRect = new Rectangle(TILE_SIZE, TILE_SIZE, currentVehicle.getColor());
+                    gridPane.add(startRect, currentVehicle.getStartY(), currentVehicle.getStartX());
+                } else if (currentVehicle.getEndX() == -1 && currentVehicle.getEndY() == -1) {
+                    currentVehicle.setEndX(x);
+                    currentVehicle.setEndY(y);
+                    vehicles.add(currentVehicle);
+                    newVehicleAdded = true;
+                    updateGrid();
+                    currentVehicle = null; // Reset current vehicle
+                }
+            } else {
+                System.out.println("Cannot place vehicle here due to nearby obstacles.");
             }
         }
+    }
+
+    private boolean isPlacementValid(int x, int y, Vehicle vehicle) {
+        // Check adjacent cells for invalid placements
+        for (int i = Math.max(0, x - 1); i <= Math.min(grid.length - 1, x + 1); i++) {
+            for (int j = Math.max(0, y - 1); j <= Math.min(grid[0].length - 1, y + 1); j++) {
+                if (vehicle.getType().equals("Friendly") && grid[i][j] == 6) {
+                    return false; // Friendly vehicle near enemy obstacle
+                } else if (vehicle.getType().equals("Enemy") && grid[i][j] == 5) {
+                    return false; // Enemy vehicle near friendly obstacle
+                }
+            }
+        }
+        return true;
     }
 
     private void updateGrid() {
@@ -164,11 +182,10 @@ public class Astar extends Application {
         for (int i = 0; i < vehicles.size(); i++) {
             vehicles.get(i).getPath().clear();
             vehicles.get(i).setCurrentX(-1);
-            vehicles.get(i).setCurrentY(-1);  
+            vehicles.get(i).setCurrentY(-1);
         }
         vehicles.clear();
         currentVehicle = null;
-        currentVehicleIndex = -1;
         startButton.setText("Start");
         updateGrid();
     }
