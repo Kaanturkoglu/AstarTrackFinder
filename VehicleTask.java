@@ -1,4 +1,6 @@
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.shape.Rectangle;
@@ -55,8 +57,9 @@ class VehicleTask implements Runnable {
             vehicle.setPath(path);
         }
 
-        if (vehicle.getPath() == null) {
+        if (vehicle.getPath() == null || vehicle.getPath().isEmpty()) {
             System.out.println("No possible path found");
+            showAlert("No Path Found", "No possible path could be found for vehicle " + vehicle.getIndex());
             return;
         }
 
@@ -121,13 +124,14 @@ class VehicleTask implements Runnable {
             List<int[]> deadlockCells = new ArrayList<>();
             for (Vehicle v : allVehicles) {
                 if (v != vehicle && v.getCurrentX() != vehicle.getEndX() && v.getCurrentY() != vehicle.getEndY()) {
-                    deadlockCells.add(new int[] { v.getCurrentX(), v.getCurrentY() });
+                    deadlockCells.add(new int[]{v.getCurrentX(), v.getCurrentY()});
                 }
             }
             List<int[]> tempPath = aStar(grid, vehicle.getCurrentX(), vehicle.getCurrentY(), vehicle.getEndX(),
                     vehicle.getEndY(), deadlockCells);
             if (tempPath.isEmpty()) {
                 System.out.println("No new path found, vehicle stalled");
+                showAlert("Rerouting Failed", "No new path could be found during rerouting for vehicle " + vehicle.getIndex());
                 return;
             }
             newPath.addAll(tempPath);
@@ -288,7 +292,7 @@ class VehicleTask implements Runnable {
         List<int[]> path = new ArrayList<>();
         Node current = node;
         while (current != null) {
-            path.add(new int[] { current.x, current.y });
+            path.add(new int[]{current.x, current.y});
             current = current.parent;
         }
         Collections.reverse(path);
@@ -389,6 +393,16 @@ class VehicleTask implements Runnable {
         }
 
         return false;
+    }
+
+    private void showAlert(String title, String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(AlertType.INFORMATION);
+            alert.setTitle(title);
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
     }
 
     private static class Node {

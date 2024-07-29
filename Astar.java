@@ -1,5 +1,8 @@
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
@@ -81,6 +84,13 @@ public class Astar extends Application {
             currentVehicle = vehicle;
         } else {
             System.out.println("Finish placing the current vehicle first.");
+            Platform.runLater(() -> {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Error");
+                alert.setHeaderText(null);
+                alert.setContentText("Finish placing the current vehicle first.");
+                alert.showAndWait();
+            });
         }
         updateGrid();
     }

@@ -17,6 +17,7 @@ abstract class Vehicle {
     Image enemyTank = new Image("file:/Users/kaanturkoglu/Desktop/enemyTank.png");
     Image heli = new Image("file:/Users/kaanturkoglu/Desktop/helitepeden.png");
     Image enemyHeli = new Image("file:/Users/kaanturkoglu/Desktop/enemyHelicopter.png");
+    Image enemyPatrolVehicle = new Image("file:/Users/kaanturkoglu/Desktop/PatrolVehicle.png");
 
     private int startX = -1, startY = -1, endX = -1, endY = -1;
     private String type;
@@ -241,5 +242,31 @@ class FriendlyHelicopter extends Vehicle {
         getIconView().setFitHeight(Astar.TILE_SIZE * 2 / 3);
         getIconView().setTranslateX((Astar.TILE_SIZE - getIconView().getFitWidth()) / 2);
         setColor(friendlyColors[(int) (Math.random() * friendlyColors.length)]);
+    }
+}
+
+class FriendlyPatrolVehicle extends Vehicle {
+    FriendlyPatrolVehicle() {
+        super();
+        setType("Friendly");
+        setVehicleType("Tank");
+        setIconView(new ImageView(tank));
+        getIconView().setFitWidth(Astar.TILE_SIZE * 1 / 2);
+        getIconView().setFitHeight(Astar.TILE_SIZE * 3 / 5);
+        getIconView().setTranslateX((Astar.TILE_SIZE - getIconView().getFitWidth()) / 2);
+        setColor(friendlyColors[(int) (Math.random() * friendlyColors.length)]);
+    }
+}
+
+class EnemyPatrolVehicle extends Vehicle {
+    EnemyPatrolVehicle() {
+        super();
+        setType("Enemy");
+        setVehicleType("PatrolVehicle");
+        setIconView(new ImageView(enemyPatrolVehicle));
+        getIconView().setFitWidth(Astar.TILE_SIZE * 1 / 2);
+        getIconView().setFitHeight(Astar.TILE_SIZE * 3 / 5);
+        getIconView().setTranslateX((Astar.TILE_SIZE - getIconView().getFitWidth()) / 2);
+        setColor(enemyColors[(int) (Math.random() * enemyColors.length)]);
     }
 }
