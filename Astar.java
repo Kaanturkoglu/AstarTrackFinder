@@ -17,13 +17,14 @@ import java.util.List;
 public class Astar extends Application {
     public static final int TILE_SIZE = 80;
     public static final int[][] DIRECTIONS = {
-            { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 }, { 1, 1 }, { -1, -1 }, { 1, -1 }, { -1, 1 }
+            {0, 1}, {0, -1}, {1, 0}, {-1, 0}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}
     };
 
-    private Track track = new Track(10, 10);
+    private Track track = new Track(20, 20);
     private int[][] grid = track.getTrack();
 
     public List<Vehicle> vehicles = new ArrayList<>();
+    private Vehicle currentVehicle = null;
     private int currentVehicleIndex = -1;
     public boolean newVehicleAdded = false;
 
@@ -51,16 +52,16 @@ public class Astar extends Application {
         scrollPane.setFitToHeight(true);
 
         Button addFriendlyTankButton = new Button("Add Friendly Tank");
-        addFriendlyTankButton.setOnAction(event -> addVehicle(new FriendlyTank()));
+        addFriendlyTankButton.setOnAction(event -> createVehicle(new FriendlyTank()));
 
         Button addEnemyTankButton = new Button("Add Enemy Tank");
-        addEnemyTankButton.setOnAction(event -> addVehicle(new EnemyTank()));
+        addEnemyTankButton.setOnAction(event -> createVehicle(new EnemyTank()));
 
         Button addFriendlyHelicopterButton = new Button("Add Friendly Helicopter");
-        addFriendlyHelicopterButton.setOnAction(event -> addVehicle(new FriendlyHelicopter()));
+        addFriendlyHelicopterButton.setOnAction(event -> createVehicle(new FriendlyHelicopter()));
 
         Button addEnemyHelicopterButton = new Button("Add Enemy Helicopter");
-        addEnemyHelicopterButton.setOnAction(event -> addVehicle(new EnemyHelicopter()));
+        addEnemyHelicopterButton.setOnAction(event -> createVehicle(new EnemyHelicopter()));
 
         startButton.setOnAction(event -> startVehicles());
 
@@ -76,12 +77,12 @@ public class Astar extends Application {
         primaryStage.show();
     }
 
-    private void addVehicle(Vehicle vehicle) {
-        currentVehicleIndex++;
-        vehicle.setIndex(currentVehicleIndex);
-        vehicles.add(vehicle);
-        newVehicleAdded = true;
-        updateGrid();
+    private void createVehicle(Vehicle vehicle) {
+        if (currentVehicle == null) {
+            currentVehicle = vehicle;
+        } else {
+            System.out.println("Finish placing the current vehicle first.");
+        }
     }
 
     private void handleCellClick(int x, int y) {
@@ -91,8 +92,7 @@ public class Astar extends Application {
             return; // Ignore clicks on obstacles
         }
 
-        if (currentVehicleIndex >= 0) {
-            Vehicle currentVehicle = vehicles.get(currentVehicleIndex);
+        if (currentVehicle != null) {
             if (currentVehicle.getStartX() == -1 && currentVehicle.getStartY() == -1) {
                 currentVehicle.setStartX(x);
                 currentVehicle.setStartY(y);
@@ -101,7 +101,11 @@ public class Astar extends Application {
             } else if (currentVehicle.getEndX() == -1 && currentVehicle.getEndY() == -1) {
                 currentVehicle.setEndX(x);
                 currentVehicle.setEndY(y);
+                vehicles.add(currentVehicle);
+                currentVehicleIndex++;
+                newVehicleAdded = true;
                 updateGrid();
+                currentVehicle = null;  // Reset current vehicle
             }
         }
     }
@@ -120,17 +124,13 @@ public class Astar extends Application {
                     rect.setFill(new ImagePattern(forest));
                 } else if (grid[i][j] == 3) {
                     rect.setFill(new ImagePattern(water));
-                } 
-                else if (grid[i][j] == 4) {
+                } else if (grid[i][j] == 4) {
                     rect.setFill(new ImagePattern(sand));
-                }
-                else if (grid[i][j] == 5) {
+                } else if (grid[i][j] == 5) {
                     rect.setFill(new ImagePattern(friendlyObs));
-                } 
-                else if (grid[i][j] == 6) {
+                } else if (grid[i][j] == 6) {
                     rect.setFill(new ImagePattern(enemyObs));
-                }
-                else {
+                } else {
                     rect.setFill(new ImagePattern(grass));
                 }
                 int x = i;
@@ -161,7 +161,13 @@ public class Astar extends Application {
     }
 
     private void clearVehicles() {
+        for (int i = 0; i < vehicles.size(); i++) {
+            vehicles.get(i).getPath().clear();
+            vehicles.get(i).setCurrentX(-1);
+            vehicles.get(i).setCurrentY(-1);  
+        }
         vehicles.clear();
+        currentVehicle = null;
         currentVehicleIndex = -1;
         startButton.setText("Start");
         updateGrid();
@@ -171,33 +177,33 @@ public class Astar extends Application {
         if (!vehicles.isEmpty()) {
             updateGrid();
             startButton.setText("Restart");
-            System.out.println("all vehiclees " + vehicles);
-            System.out.println(newVehicleAdded);
-            int restratMode = 0;
+            System.out.println("All vehicles: " + vehicles);
+            System.out.println("New vehicle added: " + newVehicleAdded);
+            int restartMode = 0;
 
             if (startButton.getText().equals("Restart")) {
-                restratMode = 1;
+                restartMode = 1;
             }
 
             for (Vehicle vehicle : vehicles) {
-                vehicle.startMovement(grid, gridPane, newVehicleAdded, restratMode);
+                vehicle.startMovement(grid, gridPane, newVehicleAdded, restartMode);
             }
 
         }
 
-        System.out.println(vehicles.size());
+        System.out.println("Number of vehicles: " + vehicles.size());
         for (int i = 0; i < vehicles.size(); i++) {
             while (vehicles.get(i).getPath() == null) {
-                // System.out.println("waiting for path");
+                // Wait for path calculation
             }
         }
-        // for (int i = 0; i < vehicles.size(); i++) {
-        // System.out.println("Vehicle " + vehicles.get(i).getIndex() + " path:");
-        // for (int j = 0; j < vehicles.get(i).getPath().size(); j++) {
-        // System.out.println(vehicles.get(i).getPath().get(j)[0] + " "
-        // + vehicles.get(i).getPath().get(j)[1]);
-        // }
-        // }
+        for (int i = 0; i < vehicles.size(); i++) {
+            System.out.println("Vehicle " + vehicles.get(i).getIndex() + " path:");
+            for (int j = 0; j < vehicles.get(i).getPath().size(); j++) {
+                System.out.println(vehicles.get(i).getPath().get(j)[0] + " "
+                        + vehicles.get(i).getPath().get(j)[1]);
+            }
+        }
         newVehicleAdded = false;
     }
 

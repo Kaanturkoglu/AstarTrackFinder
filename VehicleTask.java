@@ -20,6 +20,7 @@ class VehicleTask implements Runnable {
     private static final int DEADLOCK_PENALTY_THRESHOLD = 5;
     private static List<Vehicle> allVehicles = new ArrayList<>();
     public int mode;
+    int currentPositionIndex = 0;
 
     int count = 0;
 
@@ -48,7 +49,7 @@ class VehicleTask implements Runnable {
     @Override
     public void run() {
         if (!reRouted && mode == 0) {
-            System.out.println("first time");
+            System.out.println("First time path calculation");
             path = aStar(grid, vehicle.getStartX(), vehicle.getStartY(), vehicle.getEndX(), vehicle.getEndY(),
                     new ArrayList<>());
             vehicle.setPath(path);
@@ -59,54 +60,40 @@ class VehicleTask implements Runnable {
             return;
         }
 
-        int currentPositionIndex = 0;
-
+        
         while (currentPositionIndex < vehicle.getPath().size()) {
             int[] pos = vehicle.getPath().get(currentPositionIndex);
             int waitCycles = 0;
 
             lock.lock();
             try {
-
                 while (getVehicleAt(pos[0], pos[1]) != null) {
                     Vehicle otherVehicle = getVehicleAt(pos[0], pos[1]);
 
-                    if (this.vehicle.getType().equals("Enemy") && otherVehicle.getType().equals("Friendly")) {
-                        System.out.println("Vehicle " + vehicle.getIndex()
-                                + " encountered friendly vehicle, waiting... at point " + pos[0] + ", "
-                                + pos[1]);
-                        // Enemy-friendly encounter
-                        break;
-                    }
-
                     if (vehicle.getType().equals(otherVehicle.getType())
                             && !vehicle.getVehicleType().equals(otherVehicle.getVehicleType())) {
-                        // Friendly-friendly or enemy-enemy encounter when vehicle types are different
-                        break;
+                        break; // Friendly-friendly or enemy-enemy encounter when vehicle types are different
                     }
 
                     if (shouldReroute(otherVehicle, waitCycles)) {
-                        // Update path from current position
                         System.out.println("Vehicle " + vehicle.getIndex() + " rerouting..." + pos[0] + ", " + pos[1]);
-                        reRoute(currentPositionIndex);
+                        lock.unlock();
+                        reRoute(currentPositionIndex); // Update path from current position
                         return;
                     }
 
                     waitCycles++;
 
-                    cellFree.awaitNanos(100000000L); // 100ms
+                    cellFree.awaitNanos(1000000L); 
                 }
 
-                // Move the vehicle to the new position
-                vehicle.setCurrentX(pos[0]);
+                vehicle.setCurrentX(pos[0]); // Move the vehicle to the new position
                 vehicle.setCurrentY(pos[1]);
 
-                // Update UI
-                int finalPositionIndex = currentPositionIndex;
+                int finalPositionIndex = currentPositionIndex; // Update UI
                 Platform.runLater(() -> updateVehiclePositionStep(finalPositionIndex));
 
-                // Notify other threads waiting on the lock
-                cellFree.signalAll();
+                cellFree.signalAll(); // Notify other threads waiting on the lock
 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -115,7 +102,6 @@ class VehicleTask implements Runnable {
                 lock.unlock();
             }
 
-            // Wait for a short period to simulate animation delay
             try {
                 Thread.sleep(300); // Adjust this value to control animation speed
             } catch (InterruptedException e) {
@@ -125,14 +111,14 @@ class VehicleTask implements Runnable {
 
             currentPositionIndex++;
         }
-        vehicle.setCurrentX(-1);
-        vehicle.setCurrentY(-1);
+
+       
     }
 
     private void reRoute(int atIndex) {
         lock.lock();
         try {
-            List<int[]> newPath = new ArrayList<>(vehicle.getPath().subList(0, atIndex));
+            List<int[]> newPath = new ArrayList<>(vehicle.getPath().subList(0, atIndex - 1));
             path.clear();
             vehicle.setArrived(false);
             List<int[]> deadlockCells = new ArrayList<>();
@@ -151,13 +137,13 @@ class VehicleTask implements Runnable {
             this.path = newPath;
             vehicle.setPath(newPath);
             this.mode = 1;
+            currentPositionIndex = atIndex;
         } finally {
             lock.unlock();
         }
         this.reRouted = true;
 
-        // Continue the animation from where it left off
-        run();
+        run(); 
     }
 
     private List<int[]> aStar(int[][] grid, int startX, int startY, int endX, int endY, List<int[]> fullCells) {
@@ -195,37 +181,22 @@ class VehicleTask implements Runnable {
                 int newX = x + direction[0];
                 int newY = y + direction[1];
 
-                if (vehicle.getVehicleType().equals("Helicopter")) {
-                    if (newX >= 0 && newX < rows && newY >= 0 && newY < cols && grid[newX][newY] != 1
-                            && !visited[newX][newY] && !isCellFull(newX, newY, fullCells)) {
-                        double gCost = current.g + ((direction[0] == 0 || direction[1] == 0) ? 1 : Math.sqrt(2));
-                        double hCost = calculateHeuristic(newX, newY, endX, endY);
-                        gCost += getDeadlockPenalty(newX, newY);
-                        Node neighbor = new Node(newX, newY, current, gCost, hCost);
+                if (newX >= 0 && newX < rows && newY >= 0 && newY < cols 
+                        && grid[newX][newY] != 1
+                        && !visited[newX][newY] 
+                        && !isCellFull(newX, newY, fullCells)) {
 
-                        String key = newX + "," + newY;
-                        if (!allNodes.containsKey(key) || gCost < allNodes.get(key).g) {
-                            openList.add(neighbor);
-                            allNodes.put(key, neighbor);
-                        }
-                    }
-                } else {
-                    if (newX >= 0 && newX < rows && newY >= 0 && newY < cols
-                            && (grid[newX][newY] == 0 || grid[newX][newY] == 4)
-                            && !visited[newX][newY] && !isCellFull(newX, newY, fullCells)) {
-                        double gCost = current.g + ((direction[0] == 0 || direction[1] == 0) ? 1 : Math.sqrt(2));
-                        double hCost = calculateHeuristic(newX, newY, endX, endY);
-                        gCost += getDeadlockPenalty(newX, newY);
-                        Node neighbor = new Node(newX, newY, current, gCost, hCost);
+                    double gCost = current.g + ((direction[0] == 0 || direction[1] == 0) ? 1 : Math.sqrt(2));
+                    double hCost = calculateHeuristic(newX, newY, endX, endY);
+                    gCost += getDeadlockPenalty(newX, newY);
+                    Node neighbor = new Node(newX, newY, current, gCost, hCost);
 
-                        String key = newX + "," + newY;
-                        if (!allNodes.containsKey(key) || gCost < allNodes.get(key).g) {
-                            openList.add(neighbor);
-                            allNodes.put(key, neighbor);
-                        }
+                    String key = newX + "," + newY;
+                    if (!allNodes.containsKey(key) || gCost < allNodes.get(key).g) {
+                        openList.add(neighbor);
+                        allNodes.put(key, neighbor);
                     }
                 }
-
             }
         }
         long finish = System.nanoTime();
@@ -284,10 +255,10 @@ class VehicleTask implements Runnable {
 
         if (index == path.size() - 1) {
             vehicle.setArrived(true);
-            for (int i = 0; i < vehicle.getPath().size(); i++) {
-                System.out.println("Vehicle " + vehicle.getIndex() + " path: " + vehicle.getPath().get(i)[0] + ", "
-                        + vehicle.getPath().get(i)[1]);
-            }
+            // for (int i = 0; i < vehicle.getPath().size(); i++) {
+            //     System.out.println("Vehicle " + vehicle.getIndex() + " path: " + vehicle.getPath().get(i)[0] + ", "
+            //             + vehicle.getPath().get(i)[1]);
+            // }
         }
 
         if (index > 0) {
@@ -302,7 +273,6 @@ class VehicleTask implements Runnable {
         }
     }
 
-    // Method to update the vehicle's orientation based on movement direction
     private void updateVehicleOrientation(int[] prevPos, int[] currentPos) {
         ImageView vehicleIcon = vehicle.getIconView();
         String vehicleType = vehicle.getVehicleType();
@@ -353,7 +323,6 @@ class VehicleTask implements Runnable {
         }
 
         if (otherVehicle.getType().equals(vehicle.getType())) {
-            // Friendly-friendly or enemy-enemy encounter
             if (!vehicle.getVehicleType().equals(otherVehicle.getVehicleType())) {
                 return false;
             }
@@ -361,7 +330,6 @@ class VehicleTask implements Runnable {
                 return true;
             }
         } else {
-            // Friendly-enemy encounter
             if (vehicle.getType().equals("Friendly")) {
                 return true;
             }
