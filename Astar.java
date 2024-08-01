@@ -70,13 +70,22 @@ public class Astar extends Application {
         Button clearVehiclesButton = new Button("Clear Vehicles");
         clearVehiclesButton.setOnAction(event -> clearVehicles());
 
+        Button reMapButton = new Button("Re-Map");
+        reMapButton.setOnAction(event -> reGenerateTrack());
+
         HBox buttonsBox = new HBox(addFriendlyTankButton, addFriendlyHelicopterButton, addEnemyTankButton,
-                addEnemyHelicopterButton, startButton, clearVehiclesButton);
+                addEnemyHelicopterButton, startButton, clearVehiclesButton, reMapButton);
         VBox root = new VBox(buttonsBox, scrollPane);
         Scene scene = new Scene(root);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Grid Path Finder");
         primaryStage.show();
+    }
+
+    private void reGenerateTrack() {
+        track = new Track(20, 20);
+        grid = track.getTrack();
+        updateGrid();
     }
 
     private void createVehicle(Vehicle vehicle) {

@@ -249,7 +249,7 @@ class FriendlyPatrolVehicle extends Vehicle {
     FriendlyPatrolVehicle() {
         super();
         setType("Friendly");
-        setVehicleType("Tank");
+        setVehicleType("PatrolDrone");
         setIconView(new ImageView(tank));
         getIconView().setFitWidth(Astar.TILE_SIZE * 1 / 2);
         getIconView().setFitHeight(Astar.TILE_SIZE * 3 / 5);
@@ -262,7 +262,7 @@ class EnemyPatrolVehicle extends Vehicle {
     EnemyPatrolVehicle() {
         super();
         setType("Enemy");
-        setVehicleType("PatrolVehicle");
+        setVehicleType("PatrolDrone");
         setIconView(new ImageView(enemyPatrolVehicle));
         getIconView().setFitWidth(Astar.TILE_SIZE * 1 / 2);
         getIconView().setFitHeight(Astar.TILE_SIZE * 3 / 5);
