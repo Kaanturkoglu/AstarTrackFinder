@@ -17,7 +17,8 @@ abstract class Vehicle {
     Image enemyTank = new Image("file:/Users/kaanturkoglu/Desktop/enemyTank.png");
     Image heli = new Image("file:/Users/kaanturkoglu/Desktop/helitepeden.png");
     Image enemyHeli = new Image("file:/Users/kaanturkoglu/Desktop/enemyHelicopter.png");
-    Image enemyPatrolVehicle = new Image("file:/Users/kaanturkoglu/Desktop/PatrolVehicle.png");
+    Image friendlyPatrolVehicle = new Image("file:/Users/kaanturkoglu/Desktop/friendlyDrone.png");
+    Image enemyPatrolVehicle = new Image("file:/Users/kaanturkoglu/Desktop/enemyDrone.png");
 
     private int startX = -1, startY = -1, endX = -1, endY = -1;
     private String type;
@@ -120,6 +121,15 @@ abstract class Vehicle {
             System.out.println("aaaaaa");
             thread = new Thread(new VehicleTask(this, grid, gridPane, path));
             thread.start();
+        } else {
+            thread = new Thread(new VehicleTask(this, grid, gridPane));
+            thread.start();
+        }
+    }
+
+    public void startPatrol(int[][] grid, GridPane gridPane, boolean newVehicleAdded, int mode) {
+        if (mode == 1) {
+
         } else {
             thread = new Thread(new VehicleTask(this, grid, gridPane));
             thread.start();
@@ -250,11 +260,11 @@ class FriendlyPatrolVehicle extends Vehicle {
         super();
         setType("Friendly");
         setVehicleType("PatrolDrone");
-        setIconView(new ImageView(tank));
+        setIconView(new ImageView(friendlyPatrolVehicle));
         getIconView().setFitWidth(Astar.TILE_SIZE * 1 / 2);
         getIconView().setFitHeight(Astar.TILE_SIZE * 3 / 5);
         getIconView().setTranslateX((Astar.TILE_SIZE - getIconView().getFitWidth()) / 2);
-        setColor(friendlyColors[(int) (Math.random() * friendlyColors.length)]);
+        setColor(Color.TRANSPARENT);
     }
 }
 
@@ -267,6 +277,6 @@ class EnemyPatrolVehicle extends Vehicle {
         getIconView().setFitWidth(Astar.TILE_SIZE * 1 / 2);
         getIconView().setFitHeight(Astar.TILE_SIZE * 3 / 5);
         getIconView().setTranslateX((Astar.TILE_SIZE - getIconView().getFitWidth()) / 2);
-        setColor(enemyColors[(int) (Math.random() * enemyColors.length)]);
+        setColor(Color.TRANSPARENT);
     }
 }

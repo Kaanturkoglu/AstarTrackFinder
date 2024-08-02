@@ -4,6 +4,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
@@ -13,9 +14,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Astar extends Application {
     public static final int TILE_SIZE = 80;
@@ -83,9 +84,20 @@ public class Astar extends Application {
     }
 
     private void reGenerateTrack() {
-        track = new Track(20, 20);
-        grid = track.getTrack();
-        updateGrid();
+        Alert alert = new Alert(AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation");
+        alert.setHeaderText("Re-Map Track");
+        alert.setContentText("Are you sure you want to re-map the track? All vehicles will be removed.");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == ButtonType.OK) {
+            track = new Track(20, 20);
+            grid = track.getTrack();
+            clearVehicles();
+            updateGrid();
+        } else {
+            // do nothing
+        }
     }
 
     private void createVehicle(Vehicle vehicle) {

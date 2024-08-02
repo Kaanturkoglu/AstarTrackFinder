@@ -124,14 +124,15 @@ class VehicleTask implements Runnable {
             List<int[]> deadlockCells = new ArrayList<>();
             for (Vehicle v : allVehicles) {
                 if (v != vehicle && v.getCurrentX() != vehicle.getEndX() && v.getCurrentY() != vehicle.getEndY()) {
-                    deadlockCells.add(new int[]{v.getCurrentX(), v.getCurrentY()});
+                    deadlockCells.add(new int[] { v.getCurrentX(), v.getCurrentY() });
                 }
             }
             List<int[]> tempPath = aStar(grid, vehicle.getCurrentX(), vehicle.getCurrentY(), vehicle.getEndX(),
                     vehicle.getEndY(), deadlockCells);
             if (tempPath.isEmpty()) {
                 System.out.println("No new path found, vehicle stalled");
-                showAlert("Rerouting Failed", "No new path could be found during rerouting for vehicle " + vehicle.getIndex());
+                showAlert("Rerouting Failed",
+                        "No new path could be found during rerouting for vehicle " + vehicle.getIndex());
                 return;
             }
             newPath.addAll(tempPath);
@@ -292,7 +293,7 @@ class VehicleTask implements Runnable {
         List<int[]> path = new ArrayList<>();
         Node current = node;
         while (current != null) {
-            path.add(new int[]{current.x, current.y});
+            path.add(new int[] { current.x, current.y });
             current = current.parent;
         }
         Collections.reverse(path);
