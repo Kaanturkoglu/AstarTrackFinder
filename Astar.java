@@ -20,7 +20,7 @@ import java.util.Optional;
 public class Astar extends Application {
     public static final int TILE_SIZE = 80;
     public static final int[][] DIRECTIONS = {
-            {0, 1}, {0, -1}, {1, 0}, {-1, 0}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}
+            { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 }, { 1, 1 }, { -1, -1 }, { 1, -1 }, { -1, 1 }
     };
 
     private Track track = new Track(20, 20);

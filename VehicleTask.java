@@ -210,11 +210,14 @@ class VehicleTask implements Runnable {
 
     private boolean isObstacleArea(int x, int y, Obstacle[][] grid, String vehicleType) {
         if (vehicle.getVehicleType().equals("Tank")) {
-            if (grid[x][y].getObstacleType() == "mountain" || grid[x][y].getObstacleType() == "forest" || grid[x][y].getObstacleType() == "water" || grid[x][y].getObstacleType() == "friendlyObs" || grid[x][y].getObstacleType() == "enemyObs") {
+            if (grid[x][y].getObstacleType() == "mountain" || grid[x][y].getObstacleType() == "forest"
+                    || grid[x][y].getObstacleType() == "water" || grid[x][y].getObstacleType() == "friendlyObs"
+                    || grid[x][y].getObstacleType() == "enemyObs") {
                 return true;
             }
         } else if (vehicle.getVehicleType().equals("Helicopter")) {
-            if (grid[x][y].getObstacleType() == "mountain" || grid[x][y].getObstacleType() == "friendlyObs" || grid[x][y].getObstacleType() == "enemyObs") {
+            if (grid[x][y].getObstacleType() == "mountain" || grid[x][y].getObstacleType() == "friendlyObs"
+                    || grid[x][y].getObstacleType() == "enemyObs") {
                 return true;
             }
         }

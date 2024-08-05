@@ -57,7 +57,6 @@ public class Track {
         // Place sand around water
         placeSandAroundWater();
 
-
         for (int i = 0; i < track.length; i++) {
             for (int j = 0; j < track[0].length; j++) {
                 System.out.println(track[i][j].getObstacleType());
