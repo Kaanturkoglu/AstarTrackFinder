@@ -10,7 +10,7 @@ import java.util.Random;
 
 public class Track {
 
-    private int[][] track;
+    private Obstacle[][] track;
     private Obstacle mountain = new Mountain();
     private Obstacle forest = new Forest();
     private Obstacle water = new Water();
@@ -25,11 +25,19 @@ public class Track {
     public Track(int rows, int cols) {
         this.rows = rows;
         this.cols = cols;
-        this.track = new int[rows][cols];
+        this.track = new Obstacle[rows][cols];
         generateTrack();
     }
 
     private void generateTrack() {
+
+        // Initialize the track with clear paths
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                track[i][j] = grass; // Initialize with grass
+            }
+        }
+
         int totalCells = rows * cols;
         int numObstructions = (int) (totalCells * 0.3);
         int numMountains = (int) (numObstructions * 0.65);
@@ -49,12 +57,10 @@ public class Track {
         // Place sand around water
         placeSandAroundWater();
 
-        // Fill the rest with clear paths
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                if (track[i][j] == 0) {
-                    track[i][j] = grass.getObstacleType();
-                }
+
+        for (int i = 0; i < track.length; i++) {
+            for (int j = 0; j < track[0].length; j++) {
+                System.out.println(track[i][j].getObstacleType());
             }
         }
     }
@@ -78,8 +84,8 @@ public class Track {
                 int x = cell[0];
                 int y = cell[1];
 
-                if (x >= 0 && x < rows && y >= 0 && y < cols && track[x][y] == 0) {
-                    track[x][y] = forest.getObstacleType();
+                if (x >= 0 && x < rows && y >= 0 && y < cols && track[x][y] == grass) {
+                    track[x][y] = forest;
                     forestPlaced++;
                     cellsToPlace--;
 
@@ -97,8 +103,8 @@ public class Track {
         while (count > 0) {
             int x = rand.nextInt(rows);
             int y = rand.nextInt(cols);
-            if (track[x][y] == 0) { // Place only in empty cells
-                track[x][y] = obstacle.getObstacleType();
+            if (track[x][y] == grass) { // Place only in empty cells
+                track[x][y] = obstacle;
                 count--;
             }
         }
@@ -123,8 +129,8 @@ public class Track {
                 int x = cell[0];
                 int y = cell[1];
 
-                if (x >= 0 && x < rows && y >= 0 && y < cols && track[x][y] == 0) {
-                    track[x][y] = water.getObstacleType();
+                if (x >= 0 && x < rows && y >= 0 && y < cols && track[x][y] == grass) {
+                    track[x][y] = water;
                     waterPlaced++;
                     cellsToPlace--;
 
@@ -142,7 +148,7 @@ public class Track {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 // Check if the current cell is water
-                if (track[i][j] == water.getObstacleType()) {
+                if (track[i][j] == water) {
                     // Try to place sand in all 8 surrounding directions
                     tryPlaceSand(i - 1, j); // Up
                     tryPlaceSand(i + 1, j); // Down
@@ -159,12 +165,12 @@ public class Track {
 
     private void tryPlaceSand(int x, int y) {
         // Check if the cell is within bounds and currently a clear path or grass
-        if (x >= 0 && x < rows && y >= 0 && y < cols && (track[x][y] == 0 || track[x][y] == grass.getObstacleType())) {
-            track[x][y] = sand.getObstacleType();
+        if (x >= 0 && x < rows && y >= 0 && y < cols && (track[x][y] == grass || track[x][y] == grass)) {
+            track[x][y] = sand;
         }
     }
 
-    public int[][] getTrack() {
+    public Obstacle[][] getTrack() {
         return track;
     }
 
@@ -187,9 +193,9 @@ public class Track {
         for (int i = 0; i < rows; i++) {
             System.out.print(i + " ");
             for (int j = 0; j < cols; j++) {
-                if (track[i][j] == 1) {
+                if (track[i][j] == mountain) {
                     System.out.print(ANSI_RED + track[i][j] + ANSI_RESET + " ");
-                } else if (track[i][j] == 0) {
+                } else if (track[i][j] == grass) {
                     System.out.print(ANSI_GREEN + track[i][j] + ANSI_RESET + " ");
                 } else {
                     System.out.print(track[i][j] + " ");

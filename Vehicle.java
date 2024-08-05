@@ -13,12 +13,19 @@ abstract class Vehicle {
     Color[] enemyColors = { Color.DARKRED, Color.DARKBLUE, Color.DARKGREEN, Color.DARKORANGE, Color.DARKVIOLET,
             Color.DARKMAGENTA, Color.DARKCYAN, Color.DARKSLATEBLUE, Color.DARKSEAGREEN, Color.DARKGOLDENROD };
 
-    Image tank = new Image("file:/Users/kaanturkoglu/Desktop/aaaaa.png");
-    Image enemyTank = new Image("file:/Users/kaanturkoglu/Desktop/enemyTank.png");
-    Image heli = new Image("file:/Users/kaanturkoglu/Desktop/helitepeden.png");
-    Image enemyHeli = new Image("file:/Users/kaanturkoglu/Desktop/enemyHelicopter.png");
-    Image friendlyPatrolVehicle = new Image("file:/Users/kaanturkoglu/Desktop/friendlyDrone.png");
-    Image enemyPatrolVehicle = new Image("file:/Users/kaanturkoglu/Desktop/enemyDrone.png");
+    // Image tank = new Image("file:/Users/kaanturkoglu/Desktop/aaaaa.png");
+    // Image enemyTank = new Image("file:/Users/kaanturkoglu/Desktop/enemyTank.png");
+    // Image heli = new Image("file:/Users/kaanturkoglu/Desktop/helitepeden.png");
+    // Image enemyHeli = new Image("file:/Users/kaanturkoglu/Desktop/enemyHelicopter.png");
+    // Image friendlyPatrolVehicle = new Image("file:/Users/kaanturkoglu/Desktop/friendlyDrone.png");
+    // Image enemyPatrolVehicle = new Image("file:/Users/kaanturkoglu/Desktop/enemyDrone.png");
+
+    Image tank = new Image(getClass().getResourceAsStream("/Assets/aaaaa.png"));
+    Image enemyTank = new Image(getClass().getResourceAsStream("/Assets/enemyTank.png"));
+    Image heli = new Image(getClass().getResourceAsStream("/Assets/helitepeden.png"));
+    Image enemyHeli = new Image(getClass().getResourceAsStream("/Assets/enemyHelicopter.png"));
+    //Image friendlyPatrolVehicle = new Image(getClass().getResourceAsStream("/Assets/friendlyDrone.png"));
+    //Image enemyPatrolVehicle = new Image(getClass().getResourceAsStream("/Assets/enemyDrone.png"));
 
     private int startX = -1, startY = -1, endX = -1, endY = -1;
     private String type;
@@ -115,7 +122,7 @@ abstract class Vehicle {
         this.vehicleType = vehicleType;
     }
 
-    public void startMovement(int[][] grid, GridPane gridPane, boolean newVehicleAdded, int mode) {
+    public void startMovement(Obstacle[][] grid, GridPane gridPane, boolean newVehicleAdded, int mode) {
 
         if (this.getPath() != null && !newVehicleAdded && mode == 1) {
             System.out.println("aaaaaa");
@@ -127,7 +134,7 @@ abstract class Vehicle {
         }
     }
 
-    public void startPatrol(int[][] grid, GridPane gridPane, boolean newVehicleAdded, int mode) {
+    public void startPatrol(Obstacle[][] grid, GridPane gridPane, boolean newVehicleAdded, int mode) {
         if (mode == 1) {
 
         } else {
@@ -255,28 +262,31 @@ class FriendlyHelicopter extends Vehicle {
     }
 }
 
-class FriendlyPatrolVehicle extends Vehicle {
-    FriendlyPatrolVehicle() {
-        super();
-        setType("Friendly");
-        setVehicleType("PatrolDrone");
-        setIconView(new ImageView(friendlyPatrolVehicle));
-        getIconView().setFitWidth(Astar.TILE_SIZE * 1 / 2);
-        getIconView().setFitHeight(Astar.TILE_SIZE * 3 / 5);
-        getIconView().setTranslateX((Astar.TILE_SIZE - getIconView().getFitWidth()) / 2);
-        setColor(Color.TRANSPARENT);
-    }
-}
 
-class EnemyPatrolVehicle extends Vehicle {
-    EnemyPatrolVehicle() {
-        super();
-        setType("Enemy");
-        setVehicleType("PatrolDrone");
-        setIconView(new ImageView(enemyPatrolVehicle));
-        getIconView().setFitWidth(Astar.TILE_SIZE * 1 / 2);
-        getIconView().setFitHeight(Astar.TILE_SIZE * 3 / 5);
-        getIconView().setTranslateX((Astar.TILE_SIZE - getIconView().getFitWidth()) / 2);
-        setColor(Color.TRANSPARENT);
-    }
-}
+// Patrol vehicles are not used in the current implementation
+
+// class FriendlyPatrolVehicle extends Vehicle {
+//     FriendlyPatrolVehicle() {
+//         super();
+//         setType("Friendly");
+//         setVehicleType("PatrolDrone");
+//         setIconView(new ImageView(friendlyPatrolVehicle));
+//         getIconView().setFitWidth(Astar.TILE_SIZE * 1 / 2);
+//         getIconView().setFitHeight(Astar.TILE_SIZE * 3 / 5);
+//         getIconView().setTranslateX((Astar.TILE_SIZE - getIconView().getFitWidth()) / 2);
+//         setColor(Color.TRANSPARENT);
+//     }
+// }
+
+// class EnemyPatrolVehicle extends Vehicle {
+//     EnemyPatrolVehicle() {
+//         super();
+//         setType("Enemy");
+//         setVehicleType("PatrolDrone");
+//         setIconView(new ImageView(enemyPatrolVehicle));
+//         getIconView().setFitWidth(Astar.TILE_SIZE * 1 / 2);
+//         getIconView().setFitHeight(Astar.TILE_SIZE * 3 / 5);
+//         getIconView().setTranslateX((Astar.TILE_SIZE - getIconView().getFitWidth()) / 2);
+//         setColor(Color.TRANSPARENT);
+//     }
+// }

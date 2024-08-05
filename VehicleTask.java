@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 class VehicleTask implements Runnable {
     private final Vehicle vehicle;
-    private final int[][] grid;
+    private final Obstacle[][] grid;
     private final GridPane gridPane;
     private List<int[]> path;
     private boolean reRouted;
@@ -26,7 +26,7 @@ class VehicleTask implements Runnable {
 
     int count = 0;
 
-    public VehicleTask(Vehicle vehicle, int[][] grid, GridPane gridPane) {
+    public VehicleTask(Vehicle vehicle, Obstacle[][] grid, GridPane gridPane) {
         this.vehicle = vehicle;
         this.grid = grid;
         this.gridPane = gridPane;
@@ -37,7 +37,7 @@ class VehicleTask implements Runnable {
         }
     }
 
-    public VehicleTask(Vehicle vehicle, int[][] grid, GridPane gridPane, List<int[]> path) {
+    public VehicleTask(Vehicle vehicle, Obstacle[][] grid, GridPane gridPane, List<int[]> path) {
         this.vehicle = vehicle;
         this.grid = grid;
         this.gridPane = gridPane;
@@ -148,13 +148,13 @@ class VehicleTask implements Runnable {
         run();
     }
 
-    private List<int[]> aStar(int[][] grid, int startX, int startY, int endX, int endY, List<int[]> fullCells) {
+    private List<int[]> aStar(Obstacle[][] grid, int startX, int startY, int endX, int endY, List<int[]> fullCells) {
         int rows = grid.length;
         int cols = grid[0].length;
 
         long start = System.nanoTime();
 
-        if (grid[startX][startY] == 1 || grid[endX][endY] == 1) {
+        if (grid[startX][startY].getObstacleType() == "mountain" || grid[endX][endY].getObstacleType() == "mountain") {
             return Collections.emptyList();
         }
 
@@ -208,20 +208,20 @@ class VehicleTask implements Runnable {
         return Collections.emptyList();
     }
 
-    private boolean isObstacleArea(int x, int y, int[][] grid, String vehicleType) {
+    private boolean isObstacleArea(int x, int y, Obstacle[][] grid, String vehicleType) {
         if (vehicle.getVehicleType().equals("Tank")) {
-            if (grid[x][y] == 1 || grid[x][y] == 2 || grid[x][y] == 3 || grid[x][y] == 5 || grid[x][y] == 6) {
+            if (grid[x][y].getObstacleType() == "mountain" || grid[x][y].getObstacleType() == "forest" || grid[x][y].getObstacleType() == "water" || grid[x][y].getObstacleType() == "friendlyObs" || grid[x][y].getObstacleType() == "enemyObs") {
                 return true;
             }
         } else if (vehicle.getVehicleType().equals("Helicopter")) {
-            if (grid[x][y] == 1 || grid[x][y] == 5 || grid[x][y] == 6) {
+            if (grid[x][y].getObstacleType() == "mountain" || grid[x][y].getObstacleType() == "friendlyObs" || grid[x][y].getObstacleType() == "enemyObs") {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean isProhibitedArea(int x, int y, int[][] grid, String vehicleType) {
+    private boolean isProhibitedArea(int x, int y, Obstacle[][] grid, String vehicleType) {
         if (vehicleType.equals("Friendly")) {
             return isNearEnemyObstacle(x, y, grid);
         } else if (vehicleType.equals("Enemy")) {
@@ -231,13 +231,13 @@ class VehicleTask implements Runnable {
         return false;
     }
 
-    private boolean isNearFriendlyObstacle(int x, int y, int[][] grid) {
+    private boolean isNearFriendlyObstacle(int x, int y, Obstacle[][] grid) {
         int rows = grid.length;
         int cols = grid[0].length;
 
         for (int i = Math.max(0, x - 1); i <= Math.min(rows - 1, x + 1); i++) {
             for (int j = Math.max(0, y - 1); j <= Math.min(cols - 1, y + 1); j++) {
-                if (grid[i][j] == 5) { // Friendly obstacle
+                if (grid[i][j].getObstacleType() == "friendlyObs") { // Friendly obstacle
                     return true;
                 }
             }
@@ -246,13 +246,13 @@ class VehicleTask implements Runnable {
         return false;
     }
 
-    private boolean isNearEnemyObstacle(int x, int y, int[][] grid) {
+    private boolean isNearEnemyObstacle(int x, int y, Obstacle[][] grid) {
         int rows = grid.length;
         int cols = grid[0].length;
 
         for (int i = Math.max(0, x - 1); i <= Math.min(rows - 1, x + 1); i++) {
             for (int j = Math.max(0, y - 1); j <= Math.min(cols - 1, y + 1); j++) {
-                if (grid[i][j] == 6) { // Enemy obstacle
+                if (grid[i][j].getObstacleType() == "enemyObs") { // Enemy obstacle
                     return true;
                 }
             }

@@ -6,7 +6,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -21,11 +20,11 @@ import java.util.Optional;
 public class Astar extends Application {
     public static final int TILE_SIZE = 80;
     public static final int[][] DIRECTIONS = {
-            { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 }, { 1, 1 }, { -1, -1 }, { 1, -1 }, { -1, 1 }
+            {0, 1}, {0, -1}, {1, 0}, {-1, 0}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}
     };
 
     private Track track = new Track(20, 20);
-    private int[][] grid = track.getTrack();
+    private Obstacle[][] grid = track.getTrack();
 
     public List<Vehicle> vehicles = new ArrayList<>();
     private Vehicle currentVehicle = null;
@@ -35,16 +34,11 @@ public class Astar extends Application {
 
     Button startButton = new Button("Start");
 
-    Image grass = new Image("file:/Users/kaanturkoglu/Desktop/grass20.png");
-    Image sand = new Image("file:/Users/kaanturkoglu/Desktop/sandtile.png");
-    Image water = new Image("file:/Users/kaanturkoglu/Desktop/water.gif");
-    Image mountain = new Image("file:/Users/kaanturkoglu/Desktop/mountile.png");
-    Image forest = new Image("file:/Users/kaanturkoglu/Desktop/lowObs.png");
-    Image friendlyObs = new Image("file:/Users/kaanturkoglu/Desktop/friendsObs.png");
-    Image enemyObs = new Image("file:/Users/kaanturkoglu/Desktop/enemysObs.png");
-
     @Override
     public void start(Stage primaryStage) {
+
+        System.out.println("Start method executed");
+
         gridPane = new GridPane();
         gridPane.setGridLinesVisible(true);
 
@@ -103,6 +97,7 @@ public class Astar extends Application {
     private void createVehicle(Vehicle vehicle) {
         if (currentVehicle == null) {
             currentVehicle = vehicle;
+            System.out.println("Placing new vehicle: " + vehicle.getType());
         } else {
             System.out.println("Finish placing the current vehicle first.");
             Platform.runLater(() -> {
@@ -119,28 +114,38 @@ public class Astar extends Application {
     private void handleCellClick(int x, int y) {
         System.out.println("Clicked on cell: " + x + ", " + y);
 
-        if (grid[x][y] > 0) {
-            return; // Ignore clicks on obstacles
+        if (!grid[x][y].getObstacleType().equals("grass") && !grid[x][y].getObstacleType().equals("sand")) {
+            return; // Ignore clicks on obstacles, allow only grass or sand
         }
 
         if (currentVehicle != null) {
             // Check if placement is valid
             if (isPlacementValid(x, y, currentVehicle)) {
                 if (currentVehicle.getStartX() == -1 && currentVehicle.getStartY() == -1) {
+                    // Setting starting position
                     currentVehicle.setStartX(x);
                     currentVehicle.setStartY(y);
                     Rectangle startRect = new Rectangle(TILE_SIZE, TILE_SIZE, currentVehicle.getColor());
                     gridPane.add(startRect, currentVehicle.getStartY(), currentVehicle.getStartX());
                 } else if (currentVehicle.getEndX() == -1 && currentVehicle.getEndY() == -1) {
+                    // Setting end position
                     currentVehicle.setEndX(x);
                     currentVehicle.setEndY(y);
                     vehicles.add(currentVehicle);
                     newVehicleAdded = true;
                     updateGrid();
-                    currentVehicle = null; // Reset current vehicle
+                    currentVehicle = null; // Reset current vehicle after placement
+                    System.out.println("Vehicle placed successfully.");
                 }
             } else {
                 System.out.println("Cannot place vehicle here due to nearby obstacles.");
+                Platform.runLater(() -> {
+                    Alert alert = new Alert(AlertType.WARNING);
+                    alert.setTitle("Placement Error");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Cannot place vehicle here due to nearby obstacles.");
+                    alert.showAndWait();
+                });
             }
         }
     }
@@ -149,9 +154,10 @@ public class Astar extends Application {
         // Check adjacent cells for invalid placements
         for (int i = Math.max(0, x - 1); i <= Math.min(grid.length - 1, x + 1); i++) {
             for (int j = Math.max(0, y - 1); j <= Math.min(grid[0].length - 1, y + 1); j++) {
-                if (vehicle.getType().equals("Friendly") && grid[i][j] == 6) {
+                // Adjusting the logic to check against the vehicle type and nearby obstacles
+                if (vehicle.getType().equals("Friendly") && grid[i][j].getObstacleType().equals("enemyObs")) {
                     return false; // Friendly vehicle near enemy obstacle
-                } else if (vehicle.getType().equals("Enemy") && grid[i][j] == 5) {
+                } else if (vehicle.getType().equals("Enemy") && grid[i][j].getObstacleType().equals("friendlyObs")) {
                     return false; // Enemy vehicle near friendly obstacle
                 }
             }
@@ -166,22 +172,8 @@ public class Astar extends Application {
             for (int j = 0; j < grid[0].length; j++) {
                 Rectangle rect = new Rectangle(TILE_SIZE, TILE_SIZE);
                 rect.setStroke(Color.GRAY);
-
-                if (grid[i][j] == 1) {
-                    rect.setFill(new ImagePattern(mountain));
-                } else if (grid[i][j] == 2) {
-                    rect.setFill(new ImagePattern(forest));
-                } else if (grid[i][j] == 3) {
-                    rect.setFill(new ImagePattern(water));
-                } else if (grid[i][j] == 4) {
-                    rect.setFill(new ImagePattern(sand));
-                } else if (grid[i][j] == 5) {
-                    rect.setFill(new ImagePattern(friendlyObs));
-                } else if (grid[i][j] == 6) {
-                    rect.setFill(new ImagePattern(enemyObs));
-                } else {
-                    rect.setFill(new ImagePattern(grass));
-                }
+                // Set obstacle image
+                rect.setFill(new ImagePattern(grid[i][j].getObstacleImage()));
                 int x = i;
                 int y = j;
                 rect.setOnMouseClicked(event -> handleCellClick(x, y));
@@ -189,6 +181,7 @@ public class Astar extends Application {
             }
         }
 
+        // Add vehicles to the grid
         for (Vehicle vehicle : vehicles) {
             if (vehicle.getStartX() != -1 && vehicle.getStartY() != -1) {
                 Rectangle startRect = new Rectangle(TILE_SIZE, TILE_SIZE, vehicle.getColor());
