@@ -2,22 +2,6 @@ import javafx.scene.image.Image;
 
 public abstract class Obstacle {
 
-    // Image grass = new Image("file:/Users/kaanturkoglu/Desktop/grass20.png");
-    // Image sand = new Image("file:/Users/kaanturkoglu/Desktop/sandtile.png");
-    // Image water = new Image("file:/Users/kaanturkoglu/Desktop/water.gif");
-    // Image mountain = new Image("file:/Users/kaanturkoglu/Desktop/mountile.png");
-    // Image forest = new Image("file:/Users/kaanturkoglu/Desktop/lowObs.png");
-    // Image friendlyObs = new Image("file:/Users/kaanturkoglu/Desktop/friendsObs.png");
-    // Image enemyObs = new Image("file:/Users/kaanturkoglu/Desktop/enemysObs.png");
-
-    // Image grass = new Image("file:/Users/kaanturkoglu/Desktop/grass20.png");
-    // Image sand = new Image("file:/Users/kaanturkoglu/Desktop/sandtile.png");
-    // Image water = new Image("file:/Users/kaanturkoglu/Desktop/water.gif");
-    // Image mountain = new Image("file:/Users/kaanturkoglu/Desktop/mountile.png");
-    // Image forest = new Image("file:/Users/kaanturkoglu/Desktop/lowObs.png");
-    // Image friendlyObs = new Image("file:/Users/kaanturkoglu/Desktop/friendsObs.png");
-    // Image enemyObs = new Image("file:/Users/kaanturkoglu/Desktop/enemysObs.png");
-
     Image grass = new Image(getClass().getResourceAsStream("/Assets/grass20.png"));
     Image sand = new Image(getClass().getResourceAsStream("/Assets/sandtile.png"));
     Image water = new Image(getClass().getResourceAsStream("/Assets/water.gif"));
@@ -26,8 +10,7 @@ public abstract class Obstacle {
     Image friendlyObs = new Image(getClass().getResourceAsStream("/Assets/friendsObs.png"));
     Image enemyObs = new Image(getClass().getResourceAsStream("/Assets/enemysObs.png"));
 
-    private String obstacleType; // 0 for clear path, 1 for mountain, 2 for forest, 3 for water, 4 for sand, 5
-                              // for friendly, 6 for enemy
+    private String obstacleType; // grass, mountain, forest, water, sand, friendlyObs, enemyObs
     private int height;
     private String obsSide; // neutral, friendly, enemy
     Image obstacleImage;
@@ -104,7 +87,6 @@ class Forest extends Obstacle {
         this.obstacleImage = forest;
     }
 }
-
 
 class Water extends Obstacle {
     public Water() {
